@@ -127,7 +127,8 @@ Once done, Lefthook will automatically run the relevant checks on each commit or
 ```
 .
 ├── lefthook.yml          # Main Git Hooks configuration
-├── setup_hooks.dart      # One-command setup script
+├── tools/
+│   └── setup_hooks.dart  # One-command setup script
 ├── pubspec.yaml          # Dev dependencies and import_sorter config
 └── README.md             # Project documentation
 ```
