@@ -1,18 +1,6 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  errors:
-    depend_on_referenced_packages: ignore
-    avoid_dynamic_calls: ignore
-    avoid_slow_async_io: ignore
-    unused_field: ignore
-    invalid_use_of_visible_for_testing_member: ignore
-    use_build_context_synchronously: ignore
-    constant_identifier_names: ignore
-    strict_top_level_inference: ignore
-    library_private_types_in_public_api: ignore
-    deprecated_member_use: ignore
-    file_names: ignore
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
