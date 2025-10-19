@@ -1,0 +1,109 @@
+# lefthook.yml
+
+# =============================================================================
+# Pre-commit Hook: Quick code quality checks on staged files
+# Duration: ~5-10 seconds
+# =============================================================================
+pre-commit:
+  parallel: true
+  commands:
+    # Format Dart code with 120 character line length
+    format:
+      glob: "*.dart"
+      exclude: "*.{g,freezed,gr,mocks}.dart"
+      run: dart format --line-length 120 {staged_files}
+      stage_fixed: true
+
+    # Sort and organize imports
+    sort-imports:
+      glob: "*.dart"
+      exclude: "*.{g,freezed,gr,mocks}.dart"
+      run: flutter pub run import_sorter:main {staged_files}
+      stage_fixed: true
+
+    # Check pubspec.yaml changes
+    check-pubspec:
+      glob: "pubspec.yaml"
+      run: flutter pub get
+      fail_text: "Failed to get dependencies"
+
+# =============================================================================
+# Pre-push Hook: Comprehensive checks before pushing code
+# Duration: 10-60 seconds (depending on branch)
+# =============================================================================
+pre-push:
+  parallel: true
+  commands:
+    # Always run analyzer on all branches
+    analyze:
+      run: flutter analyze
+      fail_text: "Flutter analyze found issues. Fix them before pushing."
+
+    # Run full test suite ONLY on production branches (blocking)
+    test-production:
+      run: flutter test --no-pub --coverage
+      fail_text: |
+        ❌ Tests failed!
+        Production branch requires all tests to pass.
+        Fix the failing tests before pushing to production.
+      only:
+        - ref: main
+        - ref: master
+        - ref: production
+        - ref: release/*
+
+    # Quick test warning on development branches (non-blocking)
+    test-warning-dev:
+      run: |
+        echo "⚠️  Running quick test check..."
+        flutter test --no-pub --reporter compact || {
+          echo "⚠️  Warning: Some tests are failing on this branch"
+          echo "💡 Tip: Tests are required before merging to production"
+          exit 0
+        }
+      skip:
+        - ref: main
+        - ref: master
+        - ref: production
+        - ref: release/*
+
+# =============================================================================
+# Commit-msg Hook: Enforce conventional commit message format
+# Duration: <1 second
+# =============================================================================
+commit-msg:
+  commands:
+    check-message:
+      run: |
+        if ! grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,100}$" {1}; then
+          echo "❌ Commit message must follow conventional commits format:"
+          echo "   type(scope?): subject"
+          echo ""
+          echo "   Examples:"
+          echo "   - feat(auth): add login functionality"
+          echo "   - fix(ui): resolve button alignment issue"
+          echo "   - docs: update README"
+          echo ""
+          echo "   Valid types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
+          exit 1
+        fi
+
+# =============================================================================
+# Post-merge Hook: Auto-update dependencies after merge/pull
+# Duration: ~5-10 seconds
+# =============================================================================
+post-merge:
+  commands:
+    install-deps:
+      run: flutter pub get
+      fail_text: "Failed to get dependencies after merge"
+
+# =============================================================================
+# Post-checkout Hook: Ensure hooks are installed when switching branches
+# Duration: <1 second
+# =============================================================================
+post-checkout:
+  commands:
+    ensure-hooks:
+      run: lefthook install
+
