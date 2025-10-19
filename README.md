@@ -126,6 +126,8 @@ Once done, Lefthook will automatically run the relevant checks on each commit or
 
 ```
 .
+
+├── analysis_options.yaml
 ├── lefthook.yml          # Main Git Hooks configuration
 ├── tools/
 │   └── setup_hooks.dart  # One-command setup script
